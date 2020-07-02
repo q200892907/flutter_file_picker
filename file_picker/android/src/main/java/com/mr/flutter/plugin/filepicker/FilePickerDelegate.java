@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.DocumentsContract;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
@@ -103,7 +104,7 @@ public class FilePickerDelegate implements PluginRegistry.ActivityResultListener
                         } else if (data.getData() != null) {
                             Uri uri = data.getData();
                             String fullPath;
-                            if (type.equals("dir") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            if (TextUtils.equals(type,"dir") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                 uri = DocumentsContract.buildDocumentUriUsingTree(uri, DocumentsContract.getTreeDocumentId(uri));
                             }
 
@@ -111,7 +112,7 @@ public class FilePickerDelegate implements PluginRegistry.ActivityResultListener
                             fullPath = FileUtils.getPath(uri, FilePickerDelegate.this.activity);
 
                             if (fullPath == null) {
-                                fullPath = type.equals("dir") ? FileUtils.getFullPathFromTreeUri(uri, activity) : FileUtils.getUriFromRemote(FilePickerDelegate.this.activity, uri);
+                                fullPath = TextUtils.equals(type,"dir") ? FileUtils.getFullPathFromTreeUri(uri, activity) : FileUtils.getUriFromRemote(FilePickerDelegate.this.activity, uri);
                             }
 
                             if (fullPath != null) {
@@ -182,7 +183,7 @@ public class FilePickerDelegate implements PluginRegistry.ActivityResultListener
             return;
         }
 
-        if (type.equals("dir")) {
+        if (TextUtils.equals(type,"dir")) {
             intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
         } else {
             intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -193,7 +194,7 @@ public class FilePickerDelegate implements PluginRegistry.ActivityResultListener
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, this.isMultipleSelection);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
 
-            if (type.contains(",")) {
+            if (!TextUtils.isEmpty(type) && type.contains(",")) {
                 allowedExtensions = type.split(",");
             }
 
